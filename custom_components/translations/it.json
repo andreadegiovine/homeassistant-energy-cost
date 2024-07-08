@@ -1,0 +1,74 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Energy Cost impostazioni",
+        "data": {
+          "power_entity": "Entità consumo (mensile)",
+          "power": "Potenza energia (kW)",
+          "rate_mode": "Tipo tariffa",
+          "pun_mode": "Tariffa + PUN"
+        }
+      },
+      "final": {
+        "title": "Energy Cost impostazioni",
+        "data": {
+          "pun_entity": "Entità prezzo PUN (€/kWh)",
+          "mono_rate": "Tariffa mono (€/kWh)",
+          "current_rate_entity": "Entità fascia PUN (F1,F2,F3)",
+          "f1_rate": "Tariffa F1 (€/kWh)",
+          "f2_rate": "Tariffa F2 (€/kWh)",
+          "f3_rate": "Tariffa F3 (€/kWh)",
+          "fixed_fee": "Costi fissi (€/month)",
+          "vat_fee": "VAT (%)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Energy Cost già configurato"
+    }
+  },
+  "selector": {
+    "rate_mode": {
+      "options": {
+        "rate_mode_mono": "Tariffa monoraria",
+        "rate_mode_flex": "Tariffa fasce orarie"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "kwh_cost": {
+        "name": "Costo kWh",
+        "state_attributes": {
+          "vat_included_cost": {
+            "name": "Costo IVA ibclusa (€/kWh)"
+          },
+          "net_cost": {
+            "name": "Costo netto (€/kWh)"
+          }
+        }
+      },
+      "monthly_total_cost": {
+        "name": "Costo totale mensile",
+        "state_attributes": {
+          "energy": {
+            "name": "Energia (kWh)"
+          },
+          "energy_cost": {
+            "name": "Costo energia (€)"
+          },
+          "fixed_cost": {
+            "name": "Costi fissi (€)"
+          },
+          "vat_cost": {
+            "name": "Costo IVA (€)"
+          },
+          "total_kwh_cost": {
+            "name": "Costo totale kWh (€/kWh)"
+          }
+        }
+      }
+    }
+  }
+}
