@@ -1,0 +1,74 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Energy Cost settings",
+        "data": {
+          "power_entity": "Consumption entity (monthly)",
+          "power": "Energy power (kW)",
+          "rate_mode": "Rate mode",
+          "pun_mode": "Rate + PUN"
+        }
+      },
+      "final": {
+        "title": "Energy Cost settings",
+        "data": {
+          "pun_entity": "PUN price entity (€/kWh)",
+          "mono_rate": "Mono rate (€/kWh)",
+          "current_rate_entity": "PUN rate entity (F1,F2,F3)",
+          "f1_rate": "F1 rate (€/kWh)",
+          "f2_rate": "F2 rate (€/kWh)",
+          "f3_rate": "F3 rate (€/kWh)",
+          "fixed_fee": "Fixed fee (€/month)",
+          "vat_fee": "VAT (%)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Energy Cost already configured"
+    }
+  },
+  "selector": {
+    "rate_mode": {
+      "options": {
+        "rate_mode_mono": "Mono rate",
+        "rate_mode_flex": "Flex rates"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "kwh_cost": {
+        "name": "kWh cost",
+        "state_attributes": {
+          "vat_included_cost": {
+            "name": "VAT included cost (€/kWh)"
+          },
+          "net_cost": {
+            "name": "Net cost (€/kWh)"
+          }
+        }
+      },
+      "monthly_total_cost": {
+        "name": "Monthly total cost",
+        "state_attributes": {
+          "energy": {
+            "name": "Energy (kWh)"
+          },
+          "energy_cost": {
+            "name": "Energy cost (€)"
+          },
+          "fixed_cost": {
+            "name": "Fixed cost (€)"
+          },
+          "vat_cost": {
+            "name": "Vat cost (€)"
+          },
+          "total_kwh_cost": {
+            "name": "Total kWh cost (€/kWh)"
+          }
+        }
+      }
+    }
+  }
+}
