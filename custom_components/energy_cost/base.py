@@ -1,10 +1,11 @@
 
 import logging
-from datetime import timedelta
+from datetime import ( datetime, timedelta )
+from dateutil.relativedelta import relativedelta
 
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import ( CoordinatorEntity, DataUpdateCoordinator )
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import ( async_track_state_change, async_track_point_in_time )
 from homeassistant.components.sensor import ( SensorEntity, SensorStateClass, SensorDeviceClass )
 
 from .const import (
@@ -141,6 +142,7 @@ class EnergyCostBase(CoordinatorEntity, SensorEntity):
 
         self._coordinator = coordinator
         self._data = {}
+        self.scheduled = None
 
         self.entity_description = description
         self._attr_unique_id = "energy_cost_" + description.key
@@ -153,7 +155,27 @@ class EnergyCostBase(CoordinatorEntity, SensorEntity):
         self._attr_translation_key = description.translation_key
         self._attr_has_entity_name = True
 
+        self.schedule_monthly_reset()
+
         async_track_state_change(self._coordinator.hass, self._coordinator.config_power_entity, self._async_on_change)
+
+        if FIELD_CURRENT_RATE_ENTITY in self._coordinator.config:
+            async_track_state_change(self._coordinator.hass, self._coordinator.config_current_rate_entity, self._async_on_change)
+
+
+    def schedule_monthly_reset(self):
+        next_run = datetime.now().replace(day=1, hour=23, minute=59, second=59, microsecond=999999) + relativedelta(months=+1) - timedelta(days=1)
+        _LOGGER.error(next_run)
+
+        if self.scheduled is not None:
+            self._attr_extra_state_attributes = {}
+            self._data = {}
+            self._attr_state = 0
+
+            self.scheduled()
+            self.scheduled = None
+
+        self.scheduled = async_track_point_in_time(self._coordinator.hass, self.schedule_monthly_reset, next_run)
 
     @callback
     def _async_on_change(self, _, old_state, new_state):

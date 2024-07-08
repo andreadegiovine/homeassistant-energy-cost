@@ -86,9 +86,11 @@ class MonthlyTotalCost(EnergyCostBase):
             "energy": total_energy,
             "energy_cost": total_energy_cost,
             "fixed_cost": self._coordinator.get_monthly_fee,
-            "vat_cost": (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee,
-            "total_kwh_cost": grand_total / total_energy
+            "vat_cost": (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee
         }
+
+        if grand_total > 0 and total_energy > 0:
+            self._attr_extra_state_attributes["total_kwh_cost"] = grand_total / total_energy
 
         self._data["last_energy_cost"] = total_energy_cost
         return grand_total
