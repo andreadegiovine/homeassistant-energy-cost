@@ -1,6 +1,6 @@
 
 import logging
-from datetime import ( datetime, timedelta )
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from homeassistant.core import callback
@@ -164,7 +164,7 @@ class EnergyCostBase(CoordinatorEntity, SensorEntity):
 
 
     def schedule_monthly_reset(self):
-        next_run = datetime.now().replace(day=1, hour=23, minute=59, second=59, microsecond=999999) + relativedelta(months=+1) - timedelta(days=1)
+        next_run = datetime.now().replace(day=1, hour=00, minute=00, second=00, microsecond=000000) + relativedelta(months=+1)
         _LOGGER.error(next_run)
 
         if self.scheduled is not None:
