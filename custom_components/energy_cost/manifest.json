@@ -6,5 +6,5 @@
   "documentation": "https://www.example.com",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://www.example.com/issues",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
