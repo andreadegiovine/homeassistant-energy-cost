@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import ( CoordinatorEntity, DataUpdateCoordinator )
 from homeassistant.helpers.event import ( async_track_state_change, async_track_point_in_time )
-from homeassistant.components.sensor import ( SensorEntity, SensorStateClass, SensorDeviceClass )
+from homeassistant.components.sensor import ( RestoreSensor, SensorStateClass, SensorDeviceClass )
 
 from .const import (
                        DOMAIN,
@@ -136,7 +136,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         return amount + (amount * self.config_vat_fee)
 
 
-class EnergyCostBase(CoordinatorEntity, SensorEntity):
+class EnergyCostBase(CoordinatorEntity, RestoreSensor):
     def __init__(self, coordinator: EnergyCostCoordinator, description):
         super().__init__(coordinator)
 
