@@ -50,17 +50,15 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
 
 class KwhCost(EnergyCostBase):
-    @property
-    def state(self):
+    def update_sensor(self):
         self._attr_extra_state_attributes = {
             "net_cost": self._coordinator.get_current_kwh_rate,
             "vat_included_cost": self._coordinator.get_vat_included_amount(self._coordinator.get_kwh_cost())
         }
-        return self._coordinator.get_kwh_cost()
+        self._attr_native_value = self._coordinator.get_kwh_cost()
 
 class MonthlyTotalCost(EnergyCostBase):
-    @property
-    def state(self):
+    def update_sensor(self):
         monthly_energy = 0
         if "energy" in self._attr_extra_state_attributes:
             monthly_energy = self._attr_extra_state_attributes["energy"]
@@ -73,24 +71,23 @@ class MonthlyTotalCost(EnergyCostBase):
         total_energy_cost = self._coordinator.get_kwh_cost(total_energy)
 
         monthly_cost = 0
-        if "last_energy_cost" in self._data and self._data["last_energy_cost"] > 0:
-            monthly_cost = self._data["last_energy_cost"]
+        if "energy_cost" in self._attr_extra_state_attributes and self._attr_extra_state_attributes["energy_cost"] > 0:
+            monthly_cost = self._attr_extra_state_attributes["energy_cost"]
 
         new_cost = self._coordinator.get_kwh_cost(new_energy)
 
         total_cost = monthly_cost + new_cost
-
         grand_total = self._coordinator.get_vat_included_amount(total_cost + self._coordinator.get_monthly_fee)
 
         self._attr_extra_state_attributes = {
             "energy": total_energy,
             "energy_cost": total_energy_cost,
             "fixed_cost": self._coordinator.get_monthly_fee,
-            "vat_cost": (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee
+            "vat_cost": (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee,
+            "total_kwh_cost": 0
         }
 
         if grand_total > 0 and total_energy > 0:
             self._attr_extra_state_attributes["total_kwh_cost"] = grand_total / total_energy
 
-        self._data["last_energy_cost"] = total_energy_cost
-        return grand_total
+        self._attr_native_value = grand_total

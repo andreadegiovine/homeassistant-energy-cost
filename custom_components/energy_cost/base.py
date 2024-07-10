@@ -139,43 +139,86 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
 class EnergyCostBase(CoordinatorEntity, RestoreSensor):
     def __init__(self, coordinator: EnergyCostCoordinator, description):
         super().__init__(coordinator)
-
+        # Component
         self._coordinator = coordinator
-        self._data = {}
-        self.scheduled = None
-
+        self.is_loaded = None
+        self.is_scheduled = None
+        self.is_reset = None
+        self.restored_data = None
+        self.is_restored = None
+        # Core
         self.entity_description = description
         self._attr_unique_id = "energy_cost_" + description.key
+        self._attr_native_value = 0
         self._available = True
-#         self._attr_name = "energy_cost_" + description.key
-        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_extra_state_attributes = {}
         self._attr_suggested_display_precision = 2
         self._attr_translation_key = description.translation_key
         self._attr_has_entity_name = True
 
-        self.schedule_monthly_reset()
-
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        # Restore data
+        self.restored_data = await self.async_get_last_state()
+        if self.restored_data:
+            self.is_restored = True
+        # Monthly reset
+        await self._scheduled_monthly_reset()
+        # Update on price/energy change
         async_track_state_change(self._coordinator.hass, self._coordinator.config_power_entity, self._async_on_change)
-
         if FIELD_CURRENT_RATE_ENTITY in self._coordinator.config:
             async_track_state_change(self._coordinator.hass, self._coordinator.config_current_rate_entity, self._async_on_change)
 
+    def restore_data(self):
+        self.is_restored = None
+        self._attr_native_value = self.restored_data.state
+        for key in self.restored_data.attributes:
+            if isinstance(self.restored_data.attributes[key], (int, float)):
+                self._attr_extra_state_attributes[key] = self.restored_data.attributes[key]
+#         self._attr_extra_state_attributes = self.restored_data.attributes
 
-    def schedule_monthly_reset(self):
+    def reset_data(self):
+        self.is_reset = None
+        self._attr_native_value = 0
+        for key in self._attr_extra_state_attributes:
+            if isinstance(self._attr_extra_state_attributes[key], (int, float)):
+                self._attr_extra_state_attributes[key] = 0
+#         self._attr_extra_state_attributes = {}
+
+    def prevent_update(self):
+        if self.is_reset:
+            self.reset_data()
+            return True
+        if self.is_restored:
+            self.restore_data()
+            return True
+        return False
+
+    async def _scheduled_monthly_reset(self, now=None):
         next_run = datetime.now().replace(day=1, hour=00, minute=00, second=00, microsecond=000000) + relativedelta(months=+1)
 
-        if self.scheduled is not None:
-            self._attr_extra_state_attributes = {}
-            self._data = {}
-            self._attr_state = 0
+        if self.is_scheduled is not None:
+            self.is_scheduled()
+            self.is_scheduled = None
+            self.is_reset = True
+            await self._update_sensor()
 
-            self.scheduled()
-            self.scheduled = None
+        self.is_scheduled = async_track_point_in_time(self._coordinator.hass, self._scheduled_monthly_reset, next_run)
 
-        self.scheduled = async_track_point_in_time(self._coordinator.hass, self.schedule_monthly_reset, next_run)
+    async def _async_on_change(self, _, old_state, new_state):
+        if new_state.state != "unknown":
+            self.is_loaded = True
 
-    @callback
-    def _async_on_change(self, _, old_state, new_state):
+        if self.is_loaded:
+            await self._update_sensor()
+
+
+    async def _update_sensor(self):
+        if not self.prevent_update():
+            self.update_sensor()
         self.async_write_ha_state()
+
+    def update_sensor(self):
+        raise NotImplementedError
