@@ -1,3 +1,3 @@
 # Energy cost
 
-Word in progress
+Work in progress

@@ -3,8 +3,8 @@
   "name": "Energy cost",
   "codeowners": ["@andreadegiovine"],
   "config_flow": true,
-  "documentation": "https://www.example.com",
+  "documentation": "https://github.com/andreadegiovine/homeassistant-energy-cost",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://www.example.com/issues",
+  "issue_tracker": "https://github.com/andreadegiovine/homeassistant-energy-cost/issues",
   "version": "0.0.4"
 }
