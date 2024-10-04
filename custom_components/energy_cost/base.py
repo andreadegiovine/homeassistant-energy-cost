@@ -56,7 +56,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
     def get_power_entity_state(self):
         entity_obj =  self._hass.states.get(self.config_power_entity)
 
-        if not entity_obj or entity_obj.state == 'unknown':
+        if not entity_obj or entity_obj.state in ('unknown','unavailable'):
             return 0
 
         state = entity_obj.state
@@ -66,7 +66,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
     def get_current_rate_entity_state(self):
         entity_obj =  self._hass.states.get(self.config_current_rate_entity)
 
-        if not entity_obj or entity_obj.state == 'unknown':
+        if not entity_obj or entity_obj.state in ('unknown','unavailable'):
             return None
 
         state = entity_obj.state
@@ -76,7 +76,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
     def get_pun_entity_state(self):
         entity_obj =  self._hass.states.get(self.config_pun_entity)
 
-        if not entity_obj or entity_obj.state == 'unknown':
+        if not entity_obj or entity_obj.state in ('unknown','unavailable'):
             return 0
 
         state = entity_obj.state
