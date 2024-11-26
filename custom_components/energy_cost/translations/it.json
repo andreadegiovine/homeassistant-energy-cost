@@ -39,13 +39,16 @@
   "entity": {
     "sensor": {
       "kwh_cost": {
-        "name": "Costo kWh",
+        "name": "Costo totale kWh",
         "state_attributes": {
-          "vat_included_cost": {
-            "name": "Costo IVA ibclusa (€/kWh)"
-          },
           "net_cost": {
             "name": "Costo netto (€/kWh)"
+          },
+          "real_cost": {
+            "name": "Costo reale (€/kWh)"
+          },
+          "vat_cost": {
+            "name": "Costo IVA (€/kWh)"
           }
         }
       },

@@ -53,41 +53,53 @@ class KwhCost(EnergyCostBase):
     def update_sensor(self):
         self._attr_extra_state_attributes = {
             "net_cost": self._coordinator.get_current_kwh_rate,
-            "vat_included_cost": self._coordinator.get_vat_included_amount(self._coordinator.get_kwh_cost())
+            "real_cost": self._coordinator.get_kwh_cost(),
+            "vat_cost": self._coordinator.get_kwh_cost() * self._coordinator.config_vat_fee
         }
-        self._attr_native_value = self._coordinator.get_kwh_cost()
+        self._attr_native_value = self._coordinator.get_vat_included_amount(self._coordinator.get_kwh_cost())
 
 class MonthlyTotalCost(EnergyCostBase):
     def update_sensor(self):
-        monthly_energy = 0
+
+        current_energy = 0
         if "energy" in self._attr_extra_state_attributes:
-            monthly_energy = self._attr_extra_state_attributes["energy"]
+            current_energy = self._attr_extra_state_attributes["energy"]
 
-        new_energy = self._coordinator.get_power_entity_state
-        if monthly_energy > 0:
-            new_energy = new_energy - monthly_energy
+        current_energy_cost = 0
+        if "energy_cost" in self._attr_extra_state_attributes:
+            current_energy_cost = self._attr_extra_state_attributes["energy_cost"]
 
-        total_energy = monthly_energy + new_energy
-        total_energy_cost = self._coordinator.get_kwh_cost(total_energy)
+        new_energy = self._coordinator.get_power_entity_state - current_energy
+        new_energy_cost = self._coordinator.get_kwh_cost(new_energy)
 
-        monthly_cost = 0
-        if "energy_cost" in self._attr_extra_state_attributes and self._attr_extra_state_attributes["energy_cost"] > 0:
-            monthly_cost = self._attr_extra_state_attributes["energy_cost"]
+        total_energy = current_energy + new_energy
+        total_energy_cost = current_energy_cost + new_energy_cost
 
-        new_cost = self._coordinator.get_kwh_cost(new_energy)
+        vat_cost = (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee
 
-        total_cost = monthly_cost + new_cost
-        grand_total = self._coordinator.get_vat_included_amount(total_cost + self._coordinator.get_monthly_fee)
+        total_cost = self._coordinator.get_vat_included_amount(total_energy_cost + self._coordinator.get_monthly_fee)
+
+        kwh_cost = 0
+        if total_cost > 0 and total_energy > 0:
+            kwh_cost = total_cost / total_energy
 
         self._attr_extra_state_attributes = {
             "energy": total_energy,
             "energy_cost": total_energy_cost,
             "fixed_cost": self._coordinator.get_monthly_fee,
-            "vat_cost": (total_energy_cost + self._coordinator.get_monthly_fee) * self._coordinator.config_vat_fee,
-            "total_kwh_cost": 0
+            "vat_cost": vat_cost,
+            "total_kwh_cost": kwh_cost
         }
 
-        if grand_total > 0 and total_energy > 0:
-            self._attr_extra_state_attributes["total_kwh_cost"] = grand_total / total_energy
+        self._attr_native_value = total_cost
 
-        self._attr_native_value = grand_total
+#         _LOGGER.error(f"Current energy: {current_energy}")
+#         _LOGGER.error(f"Current energy cost: {current_energy_cost}")
+#         _LOGGER.error(f"New energy: {new_energy}")
+#         _LOGGER.error(f"New kWh cost: {self._coordinator.get_kwh_cost()}")
+#         _LOGGER.error(f"New energy cost: {new_energy_cost}")
+#         _LOGGER.error(f"Total energy: {total_energy}")
+#         _LOGGER.error(f"Total energy cost: {total_energy_cost}")
+#         _LOGGER.error(f"Total vat cost: {vat_cost}")
+#         _LOGGER.error(f"Total kWh cost: {kwh_cost}")
+#         _LOGGER.error(f"Total cost: {total_cost}")
