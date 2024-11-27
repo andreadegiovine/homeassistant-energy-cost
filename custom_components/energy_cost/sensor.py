@@ -92,14 +92,3 @@ class MonthlyTotalCost(EnergyCostBase):
         }
 
         self._attr_native_value = total_cost
-
-#         _LOGGER.error(f"Current energy: {current_energy}")
-#         _LOGGER.error(f"Current energy cost: {current_energy_cost}")
-#         _LOGGER.error(f"New energy: {new_energy}")
-#         _LOGGER.error(f"New kWh cost: {self._coordinator.get_kwh_cost()}")
-#         _LOGGER.error(f"New energy cost: {new_energy_cost}")
-#         _LOGGER.error(f"Total energy: {total_energy}")
-#         _LOGGER.error(f"Total energy cost: {total_energy_cost}")
-#         _LOGGER.error(f"Total vat cost: {vat_cost}")
-#         _LOGGER.error(f"Total kWh cost: {kwh_cost}")
-#         _LOGGER.error(f"Total cost: {total_cost}")

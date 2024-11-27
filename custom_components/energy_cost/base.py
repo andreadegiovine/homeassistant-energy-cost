@@ -177,7 +177,6 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         for key in self.restored_data.attributes:
             if isinstance(self.restored_data.attributes[key], (int, float)):
                 self._attr_extra_state_attributes[key] = self.restored_data.attributes[key]
-#         self._attr_extra_state_attributes = self.restored_data.attributes
 
     def reset_data(self):
         self.is_reset = None
@@ -185,7 +184,6 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         for key in self._attr_extra_state_attributes:
             if isinstance(self._attr_extra_state_attributes[key], (int, float)):
                 self._attr_extra_state_attributes[key] = 0
-#         self._attr_extra_state_attributes = {}
 
     def prevent_update(self):
         if self.is_reset:

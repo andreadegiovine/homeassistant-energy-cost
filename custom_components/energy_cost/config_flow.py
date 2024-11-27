@@ -23,8 +23,8 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 DATA_SCHEMA_1 = vol.Schema({
-    vol.Required(FIELD_POWER_ENTITY): selector({ "entity": { "device_class": "energy" } }), # "entity": { "device_class": "XXXXX" }
-    vol.Required(FIELD_POWER, default=4.5): float,
+    vol.Required(FIELD_POWER_ENTITY): selector({ "entity": { "device_class": "energy" } }),
+    vol.Required(FIELD_POWER, default=4.5): vol.Coerce(float),
     vol.Required(FIELD_RATE_MODE, default=FIELD_RATE_MODE_FLEX): selector({ "select": { "options": [FIELD_RATE_MODE_MONO, FIELD_RATE_MODE_FLEX], "mode": "dropdown", "translation_key": FIELD_RATE_MODE } }),
     vol.Required(FIELD_PUN_MODE, default=True): selector({ "boolean": {} })
 })
