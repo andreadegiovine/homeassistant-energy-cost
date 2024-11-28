@@ -23,7 +23,19 @@ from .const import (
                        FIELD_VAT_FEE,
                        FIELD_POWER_ENTITY,
                        FIELD_PUN_ENTITY,
-                       FIELD_CURRENT_RATE_ENTITY
+                       FIELD_CURRENT_RATE_ENTITY,
+                       DISPBT,
+                       TRASPORTO_QUOTA_FISSA,
+                       TRASPORTO_QUOTA_POTENZA,
+                       UC6_CONTINUITA_FISSO,
+                       UC6_CONTINUITA,
+                       CORRISPETTIVO_CAPACITA,
+                       DISPACCIAMENTO,
+                       TRASPORTO_QUOTA_ENERGIA,
+                       UC3_COPERTURA_SQUILIBRI,
+                       ARIM,
+                       ASOS,
+                       IMPOSTA_ERARIALE
                    )
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,34 +113,38 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         # Commercializzazione
         monthly_fee = self.config_fixed_fee
         # Quota fissa
-        monthly_fee = monthly_fee + 1.84
+        monthly_fee = monthly_fee + TRASPORTO_QUOTA_FISSA
+        # DISPbt
+        monthly_fee = monthly_fee + DISPBT
         # Quota potenza
-        monthly_fee = monthly_fee + (1.85 * self.config_power)
+        monthly_fee = monthly_fee + (TRASPORTO_QUOTA_POTENZA * self.config_power)
         # Quota continuità
-        monthly_fee = monthly_fee + (0.016567 * self.config_power)
+        monthly_fee = monthly_fee + (UC6_CONTINUITA_FISSO * self.config_power)
 
         return monthly_fee
 
     def get_kwh_cost(self, qty = 1):
         consumption_fee = 0
         # Capacità
-        consumption_fee = consumption_fee + ((qty + (qty * 0.1)) * 0.003486)
+        consumption_fee = consumption_fee + ((qty + (qty * 0.1)) * CORRISPETTIVO_CAPACITA)
         # Dispacciamento
-        consumption_fee = consumption_fee + ((qty + (qty * 0.1)) * 0.006980)
+        consumption_fee = consumption_fee + ((qty + (qty * 0.1)) * DISPACCIAMENTO)
         # Quota energia
-        consumption_fee = consumption_fee + (qty * 0.010570)
+        consumption_fee = consumption_fee + (qty * TRASPORTO_QUOTA_ENERGIA)
         # Squilibri
-        consumption_fee = consumption_fee + (qty * 0.00156)
+        consumption_fee = consumption_fee + (qty * UC3_COPERTURA_SQUILIBRI)
         # Continuità
-        consumption_fee = consumption_fee + (qty * 0.00007)
+        consumption_fee = consumption_fee + (qty * UC6_CONTINUITA)
         # Arim
-        consumption_fee = consumption_fee + (qty * 0.006987)
+        consumption_fee = consumption_fee + (qty * ARIM)
         # Asos
-        consumption_fee = consumption_fee + (qty * 0.025398)
-        # Imposte
-        consumption_fee = consumption_fee + (qty * 0.0227)
+        consumption_fee = consumption_fee + (qty * ASOS)
         # Fornitura
         consumption_fee = consumption_fee + (qty * self.get_current_kwh_rate)
+
+        # Imposte
+        if self.config_power > 3 or qty > 150:
+            consumption_fee = consumption_fee + (qty * IMPOSTA_ERARIALE)
 
         return consumption_fee
 
