@@ -4,7 +4,7 @@
       "user": {
         "title": "Energy Cost settings",
         "data": {
-          "power_entity": "Consumption entity (monthly)",
+          "power_entity": "Consumption entity (current month kWh)",
           "power": "Energy power (kW)",
           "rate_mode": "Rate mode",
           "pun_mode": "Rate + PUN"
@@ -39,13 +39,16 @@
   "entity": {
     "sensor": {
       "kwh_cost": {
-        "name": "kWh cost",
+        "name": "kWh total cost",
         "state_attributes": {
-          "vat_included_cost": {
-            "name": "VAT included cost (€/kWh)"
-          },
           "net_cost": {
             "name": "Net cost (€/kWh)"
+          },
+          "real_cost": {
+            "name": "Real cost (€/kWh)"
+          },
+          "vat_cost": {
+            "name": "Vat cost (€/kWh)"
           }
         }
       },

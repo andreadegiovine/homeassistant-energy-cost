@@ -45,6 +45,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
 
         self._hass = hass
 
+        self.unique_id = config.unique_id
         self.config = config.data
         self.config_power_entity = self.config[FIELD_POWER_ENTITY]
         self.config_power = float(self.config[FIELD_POWER])
@@ -164,7 +165,7 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         self.is_restored = None
         # Core
         self.entity_description = description
-        self._attr_unique_id = "energy_cost_" + description.key
+        self._attr_unique_id = "energy_cost_" + self._coordinator.unique_id + "_" + description.key
         self._attr_native_value = 0
         self._available = True
         self._attr_state_class = SensorStateClass.TOTAL

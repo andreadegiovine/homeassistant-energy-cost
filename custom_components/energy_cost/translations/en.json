@@ -4,7 +4,7 @@
       "user": {
         "title": "Energy Cost settings",
         "data": {
-          "power_entity": "Consumption entity (monthly)",
+          "power_entity": "Consumption entity (current month kWh)",
           "power": "Energy power (kW)",
           "rate_mode": "Rate mode",
           "pun_mode": "Rate + PUN"

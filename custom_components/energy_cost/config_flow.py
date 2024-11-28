@@ -2,6 +2,8 @@ from homeassistant import config_entries
 import voluptuous as vol
 from homeassistant.helpers.selector import selector
 import logging
+import string
+import random
 from .const import (
                         DOMAIN,
                         FIELD_POWER,
@@ -51,6 +53,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self.data = user_input
+            unique_id = res = ''.join(random.choices(string.ascii_letters, k=10))
+            await self.async_set_unique_id(unique_id)
             return await self.async_step_final()
 
         return self.async_show_form(
@@ -72,7 +76,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if self.data[FIELD_PUN_MODE]:
             step_schema = step_schema.extend({
-                vol.Required(FIELD_PUN_ENTITY): selector({ "entity": { "device_class": "enum" } })
+                vol.Required(FIELD_PUN_ENTITY): selector({ "entity": { "integration": "pun_sensor", "domain": "sensor" } })
             })
 
         if self.data[FIELD_RATE_MODE] == FIELD_RATE_MODE_MONO:
@@ -81,7 +85,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             })
         else:
             step_schema = step_schema.extend({
-                vol.Required(FIELD_CURRENT_RATE_ENTITY): selector({ "entity": { "device_class": "enum" } }),
+                vol.Required(FIELD_CURRENT_RATE_ENTITY): selector({ "entity": { "device_class": "enum", "integration": "pun_sensor", "domain": "sensor" } }),
                 vol.Required(FIELD_F1_RATE, default=0.01328): vol.Coerce(float),
                 vol.Required(FIELD_F2_RATE, default=0.01328): vol.Coerce(float),
                 vol.Required(FIELD_F3_RATE, default=0.01328): vol.Coerce(float),

@@ -4,7 +4,7 @@
       "user": {
         "title": "Energy Cost impostazioni",
         "data": {
-          "power_entity": "Entità consumo (mensile)",
+          "power_entity": "Entità consumo (kWh mese corrente)",
           "power": "Potenza energia (kW)",
           "rate_mode": "Tipo tariffa",
           "pun_mode": "Tariffa + PUN"
