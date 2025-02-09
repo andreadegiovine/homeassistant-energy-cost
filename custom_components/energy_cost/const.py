@@ -1,6 +1,8 @@
 DOMAIN = "energy_cost"
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "number"]
+
+FIELD_NAME = "name"
 
 FIELD_POWER = "power"
 FIELD_PUN_MODE = "pun_mode"

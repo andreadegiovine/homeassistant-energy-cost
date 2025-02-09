@@ -1,15 +1,19 @@
 
 import logging
-from datetime import datetime
+from datetime import ( datetime, UTC )
 from dateutil.relativedelta import relativedelta
 
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import ( CoordinatorEntity, DataUpdateCoordinator )
 from homeassistant.helpers.event import ( async_track_state_change, async_track_point_in_time )
 from homeassistant.components.sensor import ( RestoreSensor, SensorStateClass, SensorDeviceClass )
+from homeassistant.components.number import NumberEntity
+from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt
 
 from .const import (
                        DOMAIN,
+                       FIELD_NAME,
                        FIELD_POWER,
                        FIELD_PUN_MODE,
                        FIELD_RATE_MODE,
@@ -53,6 +57,11 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         self.config_pun_mode = self.config[FIELD_PUN_MODE]
         self.config_fixed_fee = float(self.config[FIELD_FIXED_FEE])
         self.config_vat_fee = float(self.config[FIELD_VAT_FEE]) / 100
+        self.extra_monthly_power = 0
+
+        self.device_name = "Energy cost"
+        if FIELD_NAME in self.config:
+            self.device_name = self.config[FIELD_NAME]
 
         if FIELD_PUN_ENTITY in self.config:
             self.config_pun_entity = self.config[FIELD_PUN_ENTITY]
@@ -70,10 +79,10 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         entity_obj =  self._hass.states.get(self.config_power_entity)
 
         if not entity_obj or entity_obj.state in ('unknown','unavailable'):
-            return 0
+            return self.extra_monthly_power
 
         state = entity_obj.state
-        return float(state)
+        return float(state) + self.extra_monthly_power
 
     @property
     def get_current_rate_entity_state(self):
@@ -153,7 +162,7 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         return amount + (amount * self.config_vat_fee)
 
 
-class EnergyCostBase(CoordinatorEntity, RestoreSensor):
+class EnergyCostBase(CoordinatorEntity):
     def __init__(self, coordinator: EnergyCostCoordinator, description):
         super().__init__(coordinator)
         # Component
@@ -175,6 +184,19 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         self._attr_translation_key = description.translation_key
         self._attr_has_entity_name = True
 
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {
+                (DOMAIN, self._coordinator.device_name, "Energy cost")
+            },
+            "name": self._coordinator.device_name,
+            "model": self._coordinator.device_name,
+            "manufacturer": "Energy cost"
+        }
+
+
+class EnergyCostSensor(EnergyCostBase, RestoreSensor):
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
         # Restore data
@@ -201,6 +223,8 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         for key in self._attr_extra_state_attributes:
             if isinstance(self._attr_extra_state_attributes[key], (int, float)):
                 self._attr_extra_state_attributes[key] = 0
+        if self._coordinator.extra_monthly_power > 0:
+            self._coordinator.extra_monthly_power = 0
 
     def prevent_update(self):
         if self.is_reset:
@@ -212,7 +236,14 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         return False
 
     async def _scheduled_monthly_reset(self, now=None):
-        next_run = datetime.now().replace(day=1, hour=00, minute=00, second=00, microsecond=000000) + relativedelta(months=+1)
+
+        def get_datetime():
+            date = datetime.now()
+            if date.tzinfo != UTC:
+                date = date.astimezone(UTC)
+            return date.astimezone(dt.get_default_time_zone())
+
+        next_run = get_datetime().replace(day=1, hour=00, minute=00, second=00, microsecond=000000) + relativedelta(months=+1)
 
         if self.is_scheduled is not None:
             self.is_scheduled()
@@ -229,6 +260,10 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
         if self.is_loaded:
             await self._update_sensor()
 
+    @callback
+    def _handle_coordinator_update(self):
+        self.update_sensor()
+        self.async_write_ha_state()
 
     async def _update_sensor(self):
         if not self.prevent_update():
@@ -237,3 +272,23 @@ class EnergyCostBase(CoordinatorEntity, RestoreSensor):
 
     def update_sensor(self):
         raise NotImplementedError
+
+
+class EnergyCostNumber(EnergyCostBase, NumberEntity, RestoreEntity):
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        restored_data = await self.async_get_last_state()
+        value = 0
+        if restored_data and restored_data.state not in ["unavailable", "unknown"]:
+            value = restored_data.state
+        self._attr_native_value = value
+        self._coordinator.extra_monthly_power = value
+
+    @property
+    def native_value(self):
+        return self._coordinator.extra_monthly_power
+
+    async def async_set_native_value(self, value: float) -> None:
+        self._attr_native_value = value
+        self._coordinator.extra_monthly_power = value
+        self._coordinator.async_update_listeners()

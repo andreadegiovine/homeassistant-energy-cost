@@ -5,7 +5,7 @@ from homeassistant.const import CURRENCY_EURO, UnitOfEnergy
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.sensor import SensorEntityDescription
 
-from .base import EnergyCostBase
+from .base import EnergyCostSensor
 from .const import (
                        DOMAIN,
                        FIELD_POWER,
@@ -49,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     async_add_entities(sensors)
 
 
-class KwhCost(EnergyCostBase):
+class KwhCost(EnergyCostSensor):
     def update_sensor(self):
         self._attr_extra_state_attributes = {
             "net_cost": self._coordinator.get_current_kwh_rate,
@@ -58,7 +58,7 @@ class KwhCost(EnergyCostBase):
         }
         self._attr_native_value = self._coordinator.get_vat_included_amount(self._coordinator.get_kwh_cost())
 
-class MonthlyTotalCost(EnergyCostBase):
+class MonthlyTotalCost(EnergyCostSensor):
     def update_sensor(self):
 
         current_energy = 0

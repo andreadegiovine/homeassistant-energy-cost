@@ -6,6 +6,7 @@ import string
 import random
 from .const import (
                         DOMAIN,
+                        FIELD_NAME,
                         FIELD_POWER,
                         FIELD_PUN_MODE,
                         FIELD_RATE_MODE,
@@ -25,6 +26,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 DATA_SCHEMA_1 = vol.Schema({
+    vol.Required(FIELD_NAME, default="Energy cost"): str,
     vol.Required(FIELD_POWER_ENTITY): selector({ "entity": { "device_class": "energy" } }),
     vol.Required(FIELD_POWER, default=4.5): vol.Coerce(float),
     vol.Required(FIELD_RATE_MODE, default=FIELD_RATE_MODE_FLEX): selector({ "select": { "options": [FIELD_RATE_MODE_MONO, FIELD_RATE_MODE_FLEX], "mode": "dropdown", "translation_key": FIELD_RATE_MODE } }),
@@ -72,7 +74,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 config_data.update(self.data)
                 config_data.update(user_input)
                 _LOGGER.info(config_data)
-                return self.async_create_entry(title="Energy Cost", data=config_data)
+                return self.async_create_entry(title=config_data[FIELD_NAME], data=config_data)
 
         if self.data[FIELD_PUN_MODE]:
             step_schema = step_schema.extend({

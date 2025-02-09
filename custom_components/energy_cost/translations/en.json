@@ -72,6 +72,11 @@
           }
         }
       }
+    },
+    "number": {
+      "extra_monthly_energy": {
+        "name": "Extra monthly energy"
+      }
     }
   }
 }
