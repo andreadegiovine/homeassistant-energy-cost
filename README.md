@@ -1,4 +1,4 @@
-# Energy cost
+# HomeAssistant - Energy cost
 ## Requisite
 - A sensor that expose the current month power consuption (kWh);
 
@@ -72,3 +72,6 @@ Current month total cost including all costs and taxes.
 "Total kWh cost" = monthly total cost / energy
 
 ![Mono rate](./images/sensor_monthly_total_cost.png)
+
+## Support the project
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/andreatito)

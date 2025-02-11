@@ -79,10 +79,10 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         entity_obj =  self._hass.states.get(self.config_power_entity)
 
         if not entity_obj or entity_obj.state in ('unknown','unavailable'):
-            return self.extra_monthly_power
+            return float(self.extra_monthly_power)
 
         state = entity_obj.state
-        return float(state) + self.extra_monthly_power
+        return float(state) + float(self.extra_monthly_power)
 
     @property
     def get_current_rate_entity_state(self):
@@ -223,7 +223,7 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
         for key in self._attr_extra_state_attributes:
             if isinstance(self._attr_extra_state_attributes[key], (int, float)):
                 self._attr_extra_state_attributes[key] = 0
-        if self._coordinator.extra_monthly_power > 0:
+        if float(self._coordinator.extra_monthly_power) > 0:
             self._coordinator.extra_monthly_power = 0
 
     def prevent_update(self):
@@ -282,7 +282,7 @@ class EnergyCostNumber(EnergyCostBase, NumberEntity, RestoreEntity):
         if restored_data and restored_data.state not in ["unavailable", "unknown"]:
             value = restored_data.state
         self._attr_native_value = value
-        self._coordinator.extra_monthly_power = value
+        self._coordinator.extra_monthly_power = float(value)
 
     @property
     def native_value(self):
