@@ -1,10 +1,12 @@
 {
   "domain": "energy_cost",
   "name": "Energy cost",
-  "codeowners": ["@andreadegiovine"],
+  "codeowners": [
+    "@andreadegiovine"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/andreadegiovine/homeassistant-energy-cost",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/andreadegiovine/homeassistant-energy-cost/issues",
-  "version": "0.1.1"
+  "version": "2025.5.2"
 }
