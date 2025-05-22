@@ -25,7 +25,8 @@
       }
     },
     "abort": {
-      "already_configured": "Energy Cost already configured"
+      "already_configured": "Energy Cost already configured",
+      "reconfigure_successful": "Energy Cost reconfigured"
     }
   },
   "selector": {
