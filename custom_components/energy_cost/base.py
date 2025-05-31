@@ -7,8 +7,6 @@ from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import ( CoordinatorEntity, DataUpdateCoordinator )
 from homeassistant.helpers.event import ( async_track_state_change, async_track_point_in_time )
 from homeassistant.components.sensor import ( RestoreSensor, SensorStateClass, SensorDeviceClass )
-from homeassistant.components.number import NumberEntity
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import dt
 
 from .const import (
@@ -57,7 +55,6 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         self.config_pun_mode = self.config[FIELD_PUN_MODE]
         self.config_fixed_fee = float(self.config[FIELD_FIXED_FEE])
         self.config_vat_fee = float(self.config[FIELD_VAT_FEE]) / 100
-        self.extra_monthly_power = 0
 
         self.device_name = "Energy cost"
         if FIELD_NAME in self.config:
@@ -79,10 +76,10 @@ class EnergyCostCoordinator(DataUpdateCoordinator):
         entity_obj =  self._hass.states.get(self.config_power_entity)
 
         if not entity_obj or entity_obj.state in ('unknown','unavailable'):
-            return float(self.extra_monthly_power)
+            return 0
 
         state = entity_obj.state
-        return float(state) + float(self.extra_monthly_power)
+        return float(state)
 
     @property
     def get_current_rate_entity_state(self):
@@ -223,8 +220,6 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
         for key in self._attr_extra_state_attributes:
             if isinstance(self._attr_extra_state_attributes[key], (int, float)):
                 self._attr_extra_state_attributes[key] = 0
-        if float(self._coordinator.extra_monthly_power) > 0:
-            self._coordinator.extra_monthly_power = 0
 
     def prevent_update(self):
         if self.is_reset:
@@ -272,23 +267,3 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
 
     def update_sensor(self):
         raise NotImplementedError
-
-
-class EnergyCostNumber(EnergyCostBase, NumberEntity, RestoreEntity):
-    async def async_added_to_hass(self):
-        await super().async_added_to_hass()
-        restored_data = await self.async_get_last_state()
-        value = 0
-        if restored_data and restored_data.state not in ["unavailable", "unknown"]:
-            value = restored_data.state
-        self._attr_native_value = value
-        self._coordinator.extra_monthly_power = float(value)
-
-    @property
-    def native_value(self):
-        return self._coordinator.extra_monthly_power
-
-    async def async_set_native_value(self, value: float) -> None:
-        self._attr_native_value = value
-        self._coordinator.extra_monthly_power = value
-        self._coordinator.async_update_listeners()

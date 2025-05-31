@@ -8,5 +8,5 @@
   "documentation": "https://github.com/andreadegiovine/homeassistant-energy-cost",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/andreadegiovine/homeassistant-energy-cost/issues",
-  "version": "2025.5.2"
+  "version": "2025.5.3"
 }
