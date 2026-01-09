@@ -204,7 +204,7 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
         await self._scheduled_monthly_reset()
         # Update on price/energy change
         async_track_state_change(self._coordinator.hass, self._coordinator.config_power_entity, self._async_on_change)
-        if FIELD_CURRENT_RATE_ENTITY in self._coordinator.config:
+        if self._coordinator.config_rate_mode == FIELD_RATE_MODE_FLEX:
             async_track_state_change(self._coordinator.hass, self._coordinator.config_current_rate_entity, self._async_on_change)
 
     def restore_data(self):
