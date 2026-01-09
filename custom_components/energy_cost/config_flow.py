@@ -34,7 +34,7 @@ def DATA_SCHEMA_1(reconfig=None):
 
     step_schema = vol.Schema({})
     if reconfig:
-        defaults = reconfig
+        defaults.update(reconfig)
     else:
         step_schema = step_schema.extend({vol.Required(FIELD_NAME, default=defaults[FIELD_NAME]): str})
 
@@ -53,7 +53,7 @@ def DATA_SCHEMA_2(reconfig=None):
         FIELD_VAT_FEE: 10
     }
     if reconfig:
-        defaults = reconfig
+        defaults.update(reconfig)
     return vol.Schema({
         vol.Optional(FIELD_FIXED_FEE, default=defaults[FIELD_FIXED_FEE]): vol.Coerce(float),
         vol.Required(FIELD_VAT_FEE, default=defaults[FIELD_VAT_FEE]): vol.Coerce(float),
@@ -64,7 +64,7 @@ def DATA_SCHEMA_3(reconfig=None):
         FIELD_PUN_ENTITY: None
     }
     if reconfig:
-        defaults = reconfig
+        defaults.update(reconfig)
     return {
         vol.Required(FIELD_PUN_ENTITY, default=defaults[FIELD_PUN_ENTITY]): selector({ "entity": { "integration": "pun_sensor", "domain": "sensor" } })
     }
@@ -74,7 +74,7 @@ def DATA_SCHEMA_4(reconfig=None):
         FIELD_MONO_RATE: 0.01328
     }
     if reconfig:
-        defaults = reconfig
+        defaults.update(reconfig)
     return {
         vol.Required(FIELD_MONO_RATE, default=defaults[FIELD_MONO_RATE]): vol.Coerce(float)
     }
@@ -87,7 +87,7 @@ def DATA_SCHEMA_5(reconfig=None):
         FIELD_F3_RATE: 0.01328,
     }
     if reconfig:
-        defaults = reconfig
+        defaults.update(reconfig)
     return {
         vol.Required(FIELD_CURRENT_RATE_ENTITY, default=defaults[FIELD_CURRENT_RATE_ENTITY]): selector({ "entity": { "device_class": "enum", "integration": "pun_sensor", "domain": "sensor" } }),
         vol.Required(FIELD_F1_RATE, default=defaults[FIELD_F1_RATE]): vol.Coerce(float),
