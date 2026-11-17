@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import ( CoordinatorEntity, DataUpdateCoordinator )
-from homeassistant.helpers.event import ( async_track_state_change, async_track_point_in_time )
+from homeassistant.helpers.event import ( async_track_state_change_event, async_track_point_in_time )
 from homeassistant.components.sensor import ( RestoreSensor, SensorStateClass, SensorDeviceClass )
 from homeassistant.util import dt
 
@@ -203,9 +203,18 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
         # Monthly reset
         await self._scheduled_monthly_reset()
         # Update on price/energy change
-        async_track_state_change(self._coordinator.hass, self._coordinator.config_power_entity, self._async_on_change)
+        tracked_entities = [self._coordinator.config_power_entity]
         if self._coordinator.config_rate_mode == FIELD_RATE_MODE_FLEX:
-            async_track_state_change(self._coordinator.hass, self._coordinator.config_current_rate_entity, self._async_on_change)
+            tracked_entities.append(self._coordinator.config_current_rate_entity)
+        self.async_on_remove(
+            async_track_state_change_event(self._coordinator.hass, tracked_entities, self._async_on_change)
+        )
+
+    async def async_will_remove_from_hass(self):
+        if self.is_scheduled is not None:
+            self.is_scheduled()
+            self.is_scheduled = None
+        await super().async_will_remove_from_hass()
 
     def restore_data(self):
         self.is_restored = None
@@ -248,8 +257,9 @@ class EnergyCostSensor(EnergyCostBase, RestoreSensor):
 
         self.is_scheduled = async_track_point_in_time(self._coordinator.hass, self._scheduled_monthly_reset, next_run)
 
-    async def _async_on_change(self, _, old_state, new_state):
-        if new_state.state != "unknown":
+    async def _async_on_change(self, event):
+        new_state = event.data.get("new_state")
+        if new_state is not None and new_state.state != "unknown":
             self.is_loaded = True
 
         if self.is_loaded:
